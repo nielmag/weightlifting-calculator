@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weightlifting Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .input-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .input-field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-field label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-field input, .input-field select {
+            padding: 12px 16px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            color: #1a1a2e;
+            width: 150px;
+        }
+
+        .input-field input:focus, .input-field select:focus {
+            outline: 3px solid #4CAF50;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        th {
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .lift-name {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .total-row {
+            background: rgba(76, 175, 80, 0.2);
+            font-weight: 600;
+        }
+
+        .training-table {
+            overflow-x: auto;
+        }
+
+        .training-table table {
+            min-width: 800px;
+        }
+
+        .pct-cell {
+            font-weight: 600;
+            background: rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .input-field input, .input-field select {
+                width: 120px;
+            }
+
+            th, td {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weightlifting Calculator</h1>
+
+        <div class="input-section">
+            <div class="input-group">
+                <div class="input-field">
+                    <label for="unit">Unit</label>
+                    <select id="unit">
+                        <option value="lbs">Pounds (lbs)</option>
+                        <option value="kg">Kilograms (kg)</option>
+                    </select>
+                </div>
+                <div class="input-field">
+                    <label for="snatch">Snatch 1RM</label>
+                    <input type="number" id="snatch" value="145" min="0" step="0.5">
+                </div>
+                <div class="input-field">
+                    <label for="cj">Clean & Jerk 1RM</label>
+                    <input type="number" id="cj" value="198" min="0" step="0.5">
+                </div>
+                <button class="btn-calculate" onclick="calculate()">Calculate</button>
+                <button class="btn-export" onclick="exportCSV()">Export CSV</button>
+            </div>
+        </div>
+
+        <div class="results-section" id="results">
+            <div class="card">
+                <h2>Estimated 1RMs</h2>
+                <table id="rmTable">
+                    <thead>
+                        <tr>
+                            <th class="lift-name">Lift</th>
+                            <th>kg</th>
+                            <th>lbs</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h2>Training Percentages</h2>
+                <div class="training-table">
+                    <table id="pctTable">
+                        <thead></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const KG_TO_LBS = 2.20462;
+        const LBS_TO_KG = 1 / KG_TO_LBS;
+
+        let currentLifts = null;
+
+        function calculate() {
+            const unit = document.getElementById('unit').value;
+            let snatch = parseFloat(document.getElementById('snatch').value) || 0;
+            let cj = parseFloat(document.getElementById('cj').value) || 0;
+
+            if (snatch <= 0 || cj <= 0) {
+                alert('Please enter valid lift numbers.');
+                return;
+            }
+
+            // Convert to kg if input is in lbs
+            const snatchKg = unit === 'kg' ? snatch : snatch * LBS_TO_KG;
+            const cjKg = unit === 'kg' ? cj : cj * LBS_TO_KG;
+
+            currentLifts = {
+                snatch: snatchKg,
+                cleanAndJerk: cjKg,
+                total: snatchKg + cjKg,
+                frontSquat: cjKg * 1.20,
+                backSquat: cjKg * 1.30,
+                cleanPull: cjKg * 1.30,
+                snatchPull: snatchKg * 1.30
+            };
+
+            renderResults();
+            document.getElementById('results').classList.add('show');
+        }
+
+        function formatDual(kg) {
+            return {
+                kg: kg.toFixed(1),
+                lbs: (kg * KG_TO_LBS).toFixed(1)
+            };
+        }
+
+        function renderResults() {
+            const lifts = currentLifts;
+
+            // 1RM Table
+            const rmData = [
+                { name: 'Snatch', value: lifts.snatch },
+                { name: 'Clean & Jerk', value: lifts.cleanAndJerk },
+                { name: 'Total', value: lifts.total, isTotal: true },
+                { name: 'Front Squat (120% C&J)', value: lifts.frontSquat },
+                { name: 'Back Squat (130% C&J)', value: lifts.backSquat },
+                { name: 'Clean Pull (130% C&J)', value: lifts.cleanPull },
+                { name: 'Snatch Pull (130% Sn)', value: lifts.snatchPull }
+            ];
+
+            const rmBody = document.querySelector('#rmTable tbody');
+            rmBody.innerHTML = rmData.map(lift => {
+                const vals = formatDual(lift.value);
+                const rowClass = lift.isTotal ? 'total-row' : '';
+                return `<tr class="${rowClass}">
+                    <td class="lift-name">${lift.name}</td>
+                    <td>${vals.kg}</td>
+                    <td>${vals.lbs}</td>
+                </tr>`;
+            }).join('');
+
+            // Training Percentages Table
+            const trainingLifts = [
+                { name: 'Snatch', value: lifts.snatch },
+                { name: 'Clean & Jerk', value: lifts.cleanAndJerk },
+                { name: 'Front Squat', value: lifts.frontSquat },
+                { name: 'Back Squat', value: lifts.backSquat },
+                { name: 'Clean Pull', value: lifts.cleanPull },
+                { name: 'Snatch Pull', value: lifts.snatchPull }
+            ];
+
+            const pctHead = document.querySelector('#pctTable thead');
+            pctHead.innerHTML = `<tr>
+                <th>%</th>
+                ${trainingLifts.map(l => `<th>${l.name}<br>(kg)</th><th>${l.name}<br>(lbs)</th>`).join('')}
+            </tr>`;
+
+            const percentages = [60, 65, 70, 75, 80, 85, 90, 95];
+            const pctBody = document.querySelector('#pctTable tbody');
+            pctBody.innerHTML = percentages.map(pct => {
+                const cells = trainingLifts.map(lift => {
+                    const vals = formatDual(lift.value * (pct / 100));
+                    return `<td>${vals.kg}</td><td>${vals.lbs}</td>`;
+                }).join('');
+                return `<tr><td class="pct-cell">${pct}%</td>${cells}</tr>`;
+            }).join('');
+        }
+
+        function exportCSV() {
+            if (!currentLifts) {
+                alert('Please calculate first.');
+                return;
+            }
+
+            const lifts = currentLifts;
+            let csv = 'ESTIMATED 1RMs\n';
+            csv += 'Lift,kg,lbs\n';
+            csv += `Snatch,${lifts.snatch.toFixed(1)},${(lifts.snatch * KG_TO_LBS).toFixed(1)}\n`;
+            csv += `Clean & Jerk,${lifts.cleanAndJerk.toFixed(1)},${(lifts.cleanAndJerk * KG_TO_LBS).toFixed(1)}\n`;
+            csv += `Total,${lifts.total.toFixed(1)},${(lifts.total * KG_TO_LBS).toFixed(1)}\n`;
+            csv += `Front Squat (120% C&J),${lifts.frontSquat.toFixed(1)},${(lifts.frontSquat * KG_TO_LBS).toFixed(1)}\n`;
+            csv += `Back Squat (130% C&J),${lifts.backSquat.toFixed(1)},${(lifts.backSquat * KG_TO_LBS).toFixed(1)}\n`;
+            csv += `Clean Pull (130% C&J),${lifts.cleanPull.toFixed(1)},${(lifts.cleanPull * KG_TO_LBS).toFixed(1)}\n`;
+            csv += `Snatch Pull (130% Sn),${lifts.snatchPull.toFixed(1)},${(lifts.snatchPull * KG_TO_LBS).toFixed(1)}\n\n`;
+
+            csv += 'TRAINING PERCENTAGES\n';
+            const trainingLifts = [
+                { name: 'Snatch', value: lifts.snatch },
+                { name: 'Clean & Jerk', value: lifts.cleanAndJerk },
+                { name: 'Front Squat', value: lifts.frontSquat },
+                { name: 'Back Squat', value: lifts.backSquat },
+                { name: 'Clean Pull', value: lifts.cleanPull },
+                { name: 'Snatch Pull', value: lifts.snatchPull }
+            ];
+
+            csv += 'Percentage,' + trainingLifts.map(l => `${l.name} (kg),${l.name} (lbs)`).join(',') + '\n';
+
+            [60, 65, 70, 75, 80, 85, 90, 95].forEach(pct => {
+                const row = trainingLifts.map(lift => {
+                    const kg = (lift.value * (pct / 100)).toFixed(1);
+                    const lbs = (lift.value * (pct / 100) * KG_TO_LBS).toFixed(1);
+                    return `${kg},${lbs}`;
+                }).join(',');
+                csv += `${pct}%,${row}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'weightlifting_numbers.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Calculate on load
+        calculate();
+    </script>
+</body>
+</html>
