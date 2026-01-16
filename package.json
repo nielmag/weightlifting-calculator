@@ -1,0 +1,13 @@
+{
+  "name": "weightlifting-calculator",
+  "version": "1.0.0",
+  "description": "Weightlifting calculator for Olympic lifts",
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@cucumber/cucumber": "^10.0.0"
+  }
+}
