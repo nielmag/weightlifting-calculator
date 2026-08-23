@@ -106,7 +106,7 @@ Feature: Weightlifting Calculator
   @total-suggestions
   Scenario: Entering a Total generates realistic split suggestions
     When I enter "152" as my Total in kg
-    Then I should see 4 split suggestion cards
+    Then I should see 5 split suggestion cards
     And each split suggestion should sum back to "152" kg
 
   @click-to-fill
@@ -126,7 +126,7 @@ Feature: Weightlifting Calculator
     Given I enter "65.8" for my Snatch 1RM in "kg"
     And I enter "89.8" for my Clean & Jerk 1RM in "kg"
     When I enter "160" as my Total in kg
-    Then I should see 4 split suggestion cards
+    Then I should see 5 split suggestion cards
     And my Snatch and Clean & Jerk values should still be "65.8" and "89.8"
 
   @persistence

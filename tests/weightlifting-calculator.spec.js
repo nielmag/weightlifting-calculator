@@ -162,11 +162,11 @@ test.describe('Weightlifting Calculator', () => {
   });
 
   test.describe('@total-suggestions - Total-based split suggestions', () => {
-    test('Entering a Total shows 4 split suggestion cards summing back to the Total', async ({ page }) => {
+    test('Entering a Total shows 5 split suggestion cards summing back to the Total', async ({ page }) => {
       await page.fill('#totalKg', '152');
 
       const cards = page.locator('.split-card');
-      await expect(cards).toHaveCount(4);
+      await expect(cards).toHaveCount(5);
 
       const cardsText = await page.locator('#splitCards').textContent();
       expect(cardsText).toMatch(/kg/);
@@ -201,7 +201,7 @@ test.describe('Weightlifting Calculator', () => {
 
       await page.fill('#totalKg', '160');
 
-      await expect(page.locator('.split-card')).toHaveCount(4);
+      await expect(page.locator('.split-card')).toHaveCount(5);
       await expect(page.locator('#snatch')).toHaveValue('65.8');
       await expect(page.locator('#cnj')).toHaveValue('89.8');
     });

@@ -50,11 +50,11 @@ test('generatePercentageTable computes correct weight per row', () => {
     assert.equal(row95.weight.kg, 95);
 });
 
-test('generateSplitSuggestions returns 4 realistic options', () => {
+test('generateSplitSuggestions returns 5 realistic options', () => {
     const suggestions = calc.generateSplitSuggestions(152);
-    assert.equal(suggestions.length, 4);
+    assert.equal(suggestions.length, 5);
     for (const s of suggestions) {
-        assert.ok(s.snatchPercent >= 0.43 && s.snatchPercent <= 0.46);
+        assert.ok(s.snatchPercent >= 0.42 && s.snatchPercent <= 0.46);
     }
 });
 

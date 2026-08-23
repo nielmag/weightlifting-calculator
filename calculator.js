@@ -19,8 +19,9 @@
     };
 
     // Realistic elite/sub-elite Snatch share of Total (Snatch is typically
-    // ~77-85% of Clean & Jerk, i.e. Snatch/Total roughly 43%-46%).
+    // ~76-85% of Clean & Jerk, i.e. Snatch/Total roughly 42%-46%).
     const SPLIT_RATIOS = [
+        { id: 'cnj-heavy', label: 'C&J-Heavy', snatchPct: 0.42 },
         { id: 'cnj-dominant', label: 'C&J-Dominant', snatchPct: 0.43 },
         { id: 'balanced-low', label: 'Balanced', snatchPct: 0.44 },
         { id: 'balanced-high', label: 'Balanced (Snatch-lean)', snatchPct: 0.45 },

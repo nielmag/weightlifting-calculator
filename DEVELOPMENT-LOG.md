@@ -21,7 +21,8 @@
 
 6. **Added Total-based split suggestions, persistence, and a full test/CI pipeline** (this change, tracked as an OpenSpec change: `openspec/changes/add-total-based-calculator/`, now archived into `openspec/specs/weightlifting-calculator/spec.md`)
    - Extracted all calculation logic into a dependency-free `calculator.js` module (usable both as a browser `<script>` and via Node's `require()`), and moved DOM/state/persistence logic into `app.js`
-   - Added a Total (kg) field: entering a value generates 4 realistic Snatch/Clean & Jerk split suggestions (~43-46% Snatch share of Total), each shown in both kg and lbs
+   - Added a Total (kg) field: entering a value generates 5 realistic Snatch/Clean & Jerk split suggestions (~42-46% Snatch share of Total), each shown in both kg and lbs
+   - The Total field is always directly editable (never locked), so a new Total can be entered at any time regardless of how the current values were populated
    - Clicking a suggestion fills the Snatch/Clean & Jerk fields and locks the Total field; editing Snatch/Clean & Jerk directly recomputes the Total live
    - All entered values (Total, Snatch, Clean & Jerk, units, and which field is driving the calculation) persist across browser sessions via `localStorage`
    - Consolidated `index.html` and `weightlifting-calculator.html` into a single canonical `index.html`
