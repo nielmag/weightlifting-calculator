@@ -4,7 +4,7 @@
   "description": "Weightlifting calculator for Olympic lifts",
   "scripts": {
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "node --test \"tests/unit/**/*.test.js\"",
+    "test:unit": "node --test",
     "test:e2e": "npx bddgen && npx playwright test",
     "test:headed": "npx bddgen && npx playwright test --headed"
   },
