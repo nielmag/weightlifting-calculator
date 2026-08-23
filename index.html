@@ -29,13 +29,20 @@
             text-transform: uppercase;
             letter-spacing: 3px;
         }
-        .input-section {
+        .total-section, .input-section {
             max-width: 600px;
-            margin: 0 auto 40px;
+            margin: 0 auto 25px;
             background: rgba(255,255,255,0.05);
             padding: 25px;
             border-radius: 15px;
             border: 1px solid rgba(65,105,225,0.3);
+        }
+        .total-section h2, .input-section h2 {
+            color: #4169E1;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .input-group {
             display: flex;
@@ -54,6 +61,10 @@
             font-size: 16px;
             width: 120px;
         }
+        input[type="number"]:read-only {
+            background: rgba(192,192,192,0.15);
+            color: #C0C0C0;
+        }
         select {
             padding: 12px;
             border: none;
@@ -67,6 +78,10 @@
             background: #1a1a2e;
             color: #fff;
             padding: 10px;
+        }
+        .both-units {
+            color: #C0C0C0;
+            font-size: 14px;
         }
         button {
             background: #4169E1;
@@ -84,6 +99,42 @@
             transition: background 0.3s;
         }
         button:hover { background: #5B7FE8; }
+        .edit-total-link {
+            background: none;
+            border: none;
+            color: #C0C0C0;
+            width: auto;
+            padding: 0;
+            margin: 10px 0 0;
+            text-transform: none;
+            letter-spacing: normal;
+            font-weight: 400;
+            font-size: 14px;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        .edit-total-link:hover { color: #fff; background: none; }
+        .split-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .split-card {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(65,105,225,0.3);
+            border-radius: 10px;
+            padding: 14px;
+            cursor: pointer;
+            text-align: left;
+            color: #eee;
+            font-family: inherit;
+        }
+        .split-card:hover { border-color: #4169E1; background: rgba(65,105,225,0.15); }
+        .split-card.selected { border-color: #C0C0C0; background: rgba(192,192,192,0.2); }
+        .split-card .split-label { font-weight: 700; color: #4169E1; margin-bottom: 6px; }
+        .split-card .split-pct { color: #C0C0C0; font-size: 13px; margin-bottom: 8px; }
+        .split-card .split-line { font-size: 14px; margin-bottom: 2px; }
         .results { max-width: 1000px; margin: 0 auto; }
         .lift-card {
             background: rgba(255,255,255,0.05);
@@ -149,17 +200,31 @@
 <body>
     <div class="company-name">IN-VISION STRENGTH SYSTEMS</div>
     <h1>Weightlifting Calculator</h1>
-    
+
+    <div class="total-section">
+        <h2>Start From a Total</h2>
+        <div class="input-group">
+            <label for="totalKg">Total (kg):</label>
+            <input type="number" id="totalKg" placeholder="e.g. 152">
+            <span class="both-units" id="totalBothUnits"></span>
+        </div>
+        <button type="button" class="edit-total-link hidden" id="editTotalBtn">Edit Total instead</button>
+        <div class="split-cards hidden" id="splitCards"></div>
+    </div>
+
     <div class="input-section">
+        <h2>Or Enter Lifts Directly</h2>
         <div class="input-group">
             <label>Snatch 1RM:</label>
             <input type="number" id="snatch" placeholder="Weight">
             <select id="snatchUnit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+            <span class="both-units" id="snatchBothUnits"></span>
         </div>
         <div class="input-group">
             <label>Clean & Jerk 1RM:</label>
             <input type="number" id="cnj" placeholder="Weight">
             <select id="cnjUnit"><option value="lbs">lbs</option><option value="kg">kg</option></select>
+            <span class="both-units" id="cnjBothUnits"></span>
         </div>
         <button onclick="calculate()">Calculate</button>
     </div>
@@ -167,91 +232,7 @@
     <div class="summary-table hidden" id="summaryTable"></div>
     <div class="results hidden" id="results"></div>
 
-    <script>
-        const KG_TO_LBS = 2.20462;
-        const LBS_TO_KG = 0.453592;
-        
-        // Estimated ratios based on competition lifts
-        const RATIOS = {
-            frontSquat: { base: 'cnj', ratio: 1.20 },      // ~120% of C&J
-            backSquat: { base: 'cnj', ratio: 1.30 },       // ~130% of C&J
-            cleanPull: { base: 'cnj', ratio: 1.30 },       // ~130% of C&J
-            snatchPull: { base: 'snatch', ratio: 1.30 }    // ~130% of Snatch
-        };
-
-        function toKg(value, unit) {
-            return unit === 'lbs' ? value * LBS_TO_KG : value;
-        }
-
-        function calculate() {
-            const snatchVal = parseFloat(document.getElementById('snatch').value);
-            const snatchUnit = document.getElementById('snatchUnit').value;
-            const cnjVal = parseFloat(document.getElementById('cnj').value);
-            const cnjUnit = document.getElementById('cnjUnit').value;
-
-            if (isNaN(snatchVal) || isNaN(cnjVal)) {
-                alert('Please enter valid numbers for both lifts');
-                return;
-            }
-
-            const snatchKg = toKg(snatchVal, snatchUnit);
-            const cnjKg = toKg(cnjVal, cnjUnit);
-
-            const lifts = {
-                'Snatch': snatchKg,
-                'Clean & Jerk': cnjKg,
-                'Front Squat': cnjKg * RATIOS.frontSquat.ratio,
-                'Back Squat': cnjKg * RATIOS.backSquat.ratio,
-                'Clean Pull': cnjKg * RATIOS.cleanPull.ratio,
-                'Snatch Pull': snatchKg * RATIOS.snatchPull.ratio
-            };
-
-            let html = '';
-            for (const [name, maxKg] of Object.entries(lifts)) {
-                const maxLbs = maxKg * KG_TO_LBS;
-                html += `
-                    <div class="lift-card">
-                        <h2>${name}</h2>
-                        <div class="max-display">1RM: ${maxKg.toFixed(1)} kg / ${maxLbs.toFixed(1)} lbs</div>
-                        <table>
-                            <tr><th>%</th><th>kg</th><th>lbs</th></tr>
-                            ${generatePercentages(maxKg)}
-                        </table>
-                    </div>
-                `;
-            }
-
-            // Build summary table
-            const total = snatchKg + cnjKg;
-            let summaryHtml = `
-                <h2>Estimated 1RMs</h2>
-                <table>
-                    <tr><th>LIFT</th><th>KG</th><th>LBS</th></tr>
-                    <tr><td>Snatch</td><td>${snatchKg.toFixed(1)}</td><td>${(snatchKg * KG_TO_LBS).toFixed(1)}</td></tr>
-                    <tr><td>Clean & Jerk</td><td>${cnjKg.toFixed(1)}</td><td>${(cnjKg * KG_TO_LBS).toFixed(1)}</td></tr>
-                    <tr class="total-row"><td>Total</td><td>${total.toFixed(1)}</td><td>${(total * KG_TO_LBS).toFixed(1)}</td></tr>
-                    <tr><td>Front Squat (120% C&J)</td><td>${lifts['Front Squat'].toFixed(1)}</td><td>${(lifts['Front Squat'] * KG_TO_LBS).toFixed(1)}</td></tr>
-                    <tr><td>Back Squat (130% C&J)</td><td>${lifts['Back Squat'].toFixed(1)}</td><td>${(lifts['Back Squat'] * KG_TO_LBS).toFixed(1)}</td></tr>
-                    <tr><td>Clean Pull (130% C&J)</td><td>${lifts['Clean Pull'].toFixed(1)}</td><td>${(lifts['Clean Pull'] * KG_TO_LBS).toFixed(1)}</td></tr>
-                    <tr><td>Snatch Pull (130% Sn)</td><td>${lifts['Snatch Pull'].toFixed(1)}</td><td>${(lifts['Snatch Pull'] * KG_TO_LBS).toFixed(1)}</td></tr>
-                </table>
-            `;
-            document.getElementById('summaryTable').innerHTML = summaryHtml;
-            document.getElementById('summaryTable').classList.remove('hidden');
-
-            document.getElementById('results').innerHTML = html;
-            document.getElementById('results').classList.remove('hidden');
-        }
-
-        function generatePercentages(maxKg) {
-            let rows = '';
-            for (let pct = 60; pct <= 95; pct += 5) {
-                const kg = maxKg * (pct / 100);
-                const lbs = kg * KG_TO_LBS;
-                rows += `<tr><td>${pct}%</td><td>${kg.toFixed(1)}</td><td>${lbs.toFixed(1)}</td></tr>`;
-            }
-            return rows;
-        }
-    </script>
+    <script src="calculator.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>

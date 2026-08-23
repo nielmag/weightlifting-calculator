@@ -1,11 +1,8 @@
 const { test, expect } = require('@playwright/test');
-const path = require('path');
-
-const PAGE_URL = `file://${path.resolve(__dirname, '../weightlifting-calculator.html')}`;
 
 test.describe('Weightlifting Calculator', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(PAGE_URL);
+    await page.goto('/index.html');
   });
 
   test.describe('@input - Input handling', () => {
@@ -14,7 +11,7 @@ test.describe('Weightlifting Calculator', () => {
       await page.selectOption('#snatchUnit', 'kg');
       await page.fill('#cnj', '89.8');
       await page.selectOption('#cnjUnit', 'kg');
-      await page.click('button');
+      await page.click('button:has-text("Calculate")');
 
       await expect(page.locator('#summaryTable')).toBeVisible();
       await expect(page.locator('.lift-card')).toHaveCount(6);
@@ -25,7 +22,7 @@ test.describe('Weightlifting Calculator', () => {
       await page.selectOption('#snatchUnit', 'lbs');
       await page.fill('#cnj', '198');
       await page.selectOption('#cnjUnit', 'lbs');
-      await page.click('button');
+      await page.click('button:has-text("Calculate")');
 
       await expect(page.locator('#summaryTable')).toBeVisible();
       await expect(page.locator('.lift-card')).toHaveCount(6);
@@ -36,7 +33,7 @@ test.describe('Weightlifting Calculator', () => {
       await page.selectOption('#snatchUnit', 'kg');
       await page.fill('#cnj', '198');
       await page.selectOption('#cnjUnit', 'lbs');
-      await page.click('button');
+      await page.click('button:has-text("Calculate")');
 
       await expect(page.locator('#summaryTable')).toBeVisible();
     });
@@ -48,7 +45,7 @@ test.describe('Weightlifting Calculator', () => {
         expect(dialog.message()).toBe('Please enter valid numbers for both lifts');
         await dialog.accept();
       });
-      await page.click('button');
+      await page.click('button:has-text("Calculate")');
     });
   });
 
@@ -63,7 +60,7 @@ test.describe('Weightlifting Calculator', () => {
       test(`Calculate 1RMs for Snatch ${tc.snatch}kg, C&J ${tc.cnj}kg`, async ({ page }) => {
         await page.fill('#snatch', tc.snatch.toString());
         await page.fill('#cnj', tc.cnj.toString());
-        await page.click('button');
+        await page.click('button:has-text("Calculate")');
 
         const summaryText = await page.locator('#summaryTable').textContent();
         expect(summaryText).toContain(tc.frontSquat.toFixed(1));
@@ -76,7 +73,7 @@ test.describe('Weightlifting Calculator', () => {
     test('Calculate total from Snatch and Clean & Jerk', async ({ page }) => {
       await page.fill('#snatch', '65.8');
       await page.fill('#cnj', '89.8');
-      await page.click('button');
+      await page.click('button:has-text("Calculate")');
 
       const summaryText = await page.locator('#summaryTable').textContent();
       expect(summaryText).toContain('155.6');
@@ -86,8 +83,10 @@ test.describe('Weightlifting Calculator', () => {
   test.describe('@conversions - Unit conversions', () => {
     test('Display weights in both kg and lbs', async ({ page }) => {
       await page.fill('#snatch', '100');
+      await page.selectOption('#snatchUnit', 'kg');
       await page.fill('#cnj', '120');
-      await page.click('button');
+      await page.selectOption('#cnjUnit', 'kg');
+      await page.click('button:has-text("Calculate")');
 
       const summaryText = await page.locator('#summaryTable').textContent();
       expect(summaryText).toContain('100.0');
@@ -100,12 +99,14 @@ test.describe('Weightlifting Calculator', () => {
   test.describe('@percentages - Training percentages', () => {
     test('Display training percentages from 60% to 95%', async ({ page }) => {
       await page.fill('#snatch', '100');
+      await page.selectOption('#snatchUnit', 'kg');
       await page.fill('#cnj', '120');
-      await page.click('button');
+      await page.selectOption('#cnjUnit', 'kg');
+      await page.click('button:has-text("Calculate")');
 
       const percentages = ['60%', '65%', '70%', '75%', '80%', '85%', '90%', '95%'];
       const firstLiftCard = page.locator('.lift-card').first();
-      
+
       for (const pct of percentages) {
         await expect(firstLiftCard).toContainText(pct);
       }
@@ -113,8 +114,10 @@ test.describe('Weightlifting Calculator', () => {
 
     test('Verify 60% and 95% for Snatch', async ({ page }) => {
       await page.fill('#snatch', '100');
+      await page.selectOption('#snatchUnit', 'kg');
       await page.fill('#cnj', '120');
-      await page.click('button');
+      await page.selectOption('#cnjUnit', 'kg');
+      await page.click('button:has-text("Calculate")');
 
       const snatchCard = page.locator('.lift-card').first();
       const cardText = await snatchCard.textContent();
@@ -131,8 +134,10 @@ test.describe('Weightlifting Calculator', () => {
     for (const tc of percentageTests) {
       test(`Verify ${tc.percentage}% for ${tc.lift}`, async ({ page }) => {
         await page.fill('#snatch', '100');
+        await page.selectOption('#snatchUnit', 'kg');
         await page.fill('#cnj', '120');
-        await page.click('button');
+        await page.selectOption('#cnjUnit', 'kg');
+        await page.click('button:has-text("Calculate")');
 
         const snatchCard = page.locator('.lift-card').first();
         const cardText = await snatchCard.textContent();
@@ -146,13 +151,78 @@ test.describe('Weightlifting Calculator', () => {
     test('Summary table displays all lifts with ratio labels', async ({ page }) => {
       await page.fill('#snatch', '65.8');
       await page.fill('#cnj', '89.8');
-      await page.click('button');
+      await page.click('button:has-text("Calculate")');
 
       const summaryText = await page.locator('#summaryTable').textContent();
       expect(summaryText).toContain('Front Squat (120% C&J)');
       expect(summaryText).toContain('Back Squat (130% C&J)');
       expect(summaryText).toContain('Clean Pull (130% C&J)');
       expect(summaryText).toContain('Snatch Pull (130% Sn)');
+    });
+  });
+
+  test.describe('@total-suggestions - Total-based split suggestions', () => {
+    test('Entering a Total shows 4 split suggestion cards summing back to the Total', async ({ page }) => {
+      await page.fill('#totalKg', '152');
+
+      const cards = page.locator('.split-card');
+      await expect(cards).toHaveCount(4);
+
+      const cardsText = await page.locator('#splitCards').textContent();
+      expect(cardsText).toMatch(/kg/);
+      expect(cardsText).toMatch(/lbs/);
+    });
+  });
+
+  test.describe('@click-to-fill - Selecting a split suggestion', () => {
+    test('Clicking a split card fills Snatch/C&J and locks the Total field', async ({ page }) => {
+      await page.fill('#totalKg', '152');
+      await page.locator('.split-card').first().click();
+
+      const snatchVal = parseFloat(await page.inputValue('#snatch'));
+      const cnjVal = parseFloat(await page.inputValue('#cnj'));
+      expect(snatchVal + cnjVal).toBeCloseTo(152, 5);
+
+      await expect(page.locator('#totalKg')).toHaveAttribute('readonly', '');
+      await expect(page.locator('#editTotalBtn')).toBeVisible();
+    });
+  });
+
+  test.describe('@bidirectional - Editing lifts recomputes the Total', () => {
+    test('Editing Snatch and C&J directly updates the Total live', async ({ page }) => {
+      await page.fill('#snatch', '65.8');
+      await page.selectOption('#snatchUnit', 'kg');
+      await page.fill('#cnj', '89.8');
+      await page.selectOption('#cnjUnit', 'kg');
+
+      await expect(page.locator('#totalKg')).toHaveValue('155.6');
+      await expect(page.locator('#totalKg')).toHaveAttribute('readonly', '');
+    });
+
+    test('Edit Total instead unlocks the Total field without clearing lifts', async ({ page }) => {
+      await page.fill('#snatch', '65.8');
+      await page.fill('#cnj', '89.8');
+      await page.click('#editTotalBtn');
+
+      await expect(page.locator('#totalKg')).not.toHaveAttribute('readonly', '');
+      await expect(page.locator('#snatch')).toHaveValue('65.8');
+      await expect(page.locator('#cnj')).toHaveValue('89.8');
+    });
+  });
+
+  test.describe('@persistence - Cross-session persistence', () => {
+    test('Values survive a page reload', async ({ page }) => {
+      await page.fill('#snatch', '65.8');
+      await page.selectOption('#snatchUnit', 'kg');
+      await page.fill('#cnj', '89.8');
+      await page.selectOption('#cnjUnit', 'kg');
+
+      await page.reload();
+
+      await expect(page.locator('#snatch')).toHaveValue('65.8');
+      await expect(page.locator('#cnj')).toHaveValue('89.8');
+      await expect(page.locator('#totalKg')).toHaveValue('155.6');
+      await expect(page.locator('#summaryTable')).toBeVisible();
     });
   });
 });
