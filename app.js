@@ -1,14 +1,12 @@
 (function () {
     'use strict';
 
-    var STORAGE_KEY = 'weightlifting-calculator:v1';
-    var totalMode = 'input'; // 'input' | 'derived'
+    var STORAGE_KEY = 'weightlifting-calculator:v2';
     var els = {};
 
     function cacheEls() {
         els.totalKg = document.getElementById('totalKg');
         els.totalBothUnits = document.getElementById('totalBothUnits');
-        els.editTotalBtn = document.getElementById('editTotalBtn');
         els.splitCards = document.getElementById('splitCards');
         els.snatch = document.getElementById('snatch');
         els.snatchUnit = document.getElementById('snatchUnit');
@@ -47,17 +45,6 @@
         els.totalBothUnits.textContent = isNaN(totalVal) ? '' : formatBoth(totalVal);
     }
 
-    function setMode(mode) {
-        totalMode = mode;
-        if (mode === 'derived') {
-            els.totalKg.setAttribute('readonly', '');
-            els.editTotalBtn.classList.remove('hidden');
-        } else {
-            els.totalKg.removeAttribute('readonly');
-            els.editTotalBtn.classList.add('hidden');
-        }
-    }
-
     function renderSplitCards(totalKg, selectedId) {
         if (isNaN(totalKg)) {
             els.splitCards.innerHTML = '';
@@ -94,14 +81,12 @@
         els.cnjUnit.value = 'kg';
         els.totalKg.value = suggestion.snatch.kg + suggestion.cnj.kg;
 
-        setMode('derived');
         updateBothUnitsDisplays();
         renderSplitCards(parseFloat(els.totalKg.value), suggestion.id);
         saveState();
     }
 
     function onTotalInput() {
-        if (totalMode !== 'input') return;
         var totalKg = parseFloat(els.totalKg.value);
         updateBothUnitsDisplays();
         renderSplitCards(!isNaN(totalKg) && totalKg > 0 ? totalKg : NaN);
@@ -115,20 +100,10 @@
         if (snatchKg !== null && cnjKg !== null) {
             var totalKg = WLCalc.calculateTotalKg(snatchKg, cnjKg);
             els.totalKg.value = totalKg.toFixed(1);
-            setMode('derived');
             renderSplitCards(NaN);
         }
 
         updateBothUnitsDisplays();
-        saveState();
-    }
-
-    function onEditTotalClick() {
-        setMode('input');
-        var totalVal = parseFloat(els.totalKg.value);
-        if (!isNaN(totalVal)) {
-            renderSplitCards(totalVal, null);
-        }
         saveState();
     }
 
@@ -194,8 +169,7 @@
         try {
             if (typeof localStorage === 'undefined') return;
             var state = {
-                version: 1,
-                totalMode: totalMode,
+                version: 2,
                 totalKg: parseFloat(els.totalKg.value),
                 snatch: { value: els.snatch.value, unit: els.snatchUnit.value },
                 cnj: { value: els.cnj.value, unit: els.cnjUnit.value },
@@ -213,7 +187,7 @@
             var raw = localStorage.getItem(STORAGE_KEY);
             if (!raw) return null;
             var state = JSON.parse(raw);
-            if (!state || state.version !== 1) return null;
+            if (!state || state.version !== 2) return null;
             return state;
         } catch (e) {
             return null;
@@ -236,13 +210,10 @@
             els.totalKg.value = state.totalKg;
         }
 
-        setMode(state.totalMode === 'derived' ? 'derived' : 'input');
         updateBothUnitsDisplays();
 
-        if (totalMode === 'input') {
-            var totalVal = parseFloat(els.totalKg.value);
-            if (!isNaN(totalVal)) renderSplitCards(totalVal, null);
-        }
+        var totalVal = parseFloat(els.totalKg.value);
+        if (!isNaN(totalVal)) renderSplitCards(totalVal, null);
 
         var snatchKg = getSnatchKg();
         var cnjKg = getCnjKg();
@@ -258,7 +229,6 @@
         els.snatchUnit.addEventListener('change', onLiftInput);
         els.cnj.addEventListener('input', onLiftInput);
         els.cnjUnit.addEventListener('change', onLiftInput);
-        els.editTotalBtn.addEventListener('click', onEditTotalClick);
 
         restoreState();
     });

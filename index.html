@@ -61,10 +61,6 @@
             font-size: 16px;
             width: 120px;
         }
-        input[type="number"]:read-only {
-            background: rgba(192,192,192,0.15);
-            color: #C0C0C0;
-        }
         select {
             padding: 12px;
             border: none;
@@ -99,21 +95,6 @@
             transition: background 0.3s;
         }
         button:hover { background: #5B7FE8; }
-        .edit-total-link {
-            background: none;
-            border: none;
-            color: #C0C0C0;
-            width: auto;
-            padding: 0;
-            margin: 10px 0 0;
-            text-transform: none;
-            letter-spacing: normal;
-            font-weight: 400;
-            font-size: 14px;
-            text-decoration: underline;
-            cursor: pointer;
-        }
-        .edit-total-link:hover { color: #fff; background: none; }
         .split-cards {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
@@ -208,7 +189,6 @@
             <input type="number" id="totalKg" placeholder="e.g. 152">
             <span class="both-units" id="totalBothUnits"></span>
         </div>
-        <button type="button" class="edit-total-link hidden" id="editTotalBtn">Edit Total instead</button>
         <div class="split-cards hidden" id="splitCards"></div>
     </div>
 

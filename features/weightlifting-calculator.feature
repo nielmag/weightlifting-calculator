@@ -110,25 +110,23 @@ Feature: Weightlifting Calculator
     And each split suggestion should sum back to "152" kg
 
   @click-to-fill
-  Scenario: Selecting a split suggestion fills the lift fields and locks the Total
+  Scenario: Selecting a split suggestion fills the lift fields
     Given I enter "152" as my Total in kg
     When I click the first split suggestion
     Then the Snatch and Clean & Jerk fields should be filled in kg
-    And the Total field should be read-only
 
   @bidirectional
   Scenario: Editing lifts directly recomputes the Total
     When I enter "65.8" for my Snatch 1RM in "kg"
     And I enter "89.8" for my Clean & Jerk 1RM in "kg"
     Then the Total should show "155.6" kg
-    And the Total field should be read-only
 
   @bidirectional
-  Scenario: Returning to Total entry unlocks the field without clearing lifts
+  Scenario: A new Total can be typed directly even after lifts derived one
     Given I enter "65.8" for my Snatch 1RM in "kg"
     And I enter "89.8" for my Clean & Jerk 1RM in "kg"
-    When I click "Edit Total instead"
-    Then the Total field should be editable
+    When I enter "160" as my Total in kg
+    Then I should see 4 split suggestion cards
     And my Snatch and Clean & Jerk values should still be "65.8" and "89.8"
 
   @persistence

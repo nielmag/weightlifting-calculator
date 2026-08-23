@@ -175,16 +175,13 @@ test.describe('Weightlifting Calculator', () => {
   });
 
   test.describe('@click-to-fill - Selecting a split suggestion', () => {
-    test('Clicking a split card fills Snatch/C&J and locks the Total field', async ({ page }) => {
+    test('Clicking a split card fills Snatch/C&J', async ({ page }) => {
       await page.fill('#totalKg', '152');
       await page.locator('.split-card').first().click();
 
       const snatchVal = parseFloat(await page.inputValue('#snatch'));
       const cnjVal = parseFloat(await page.inputValue('#cnj'));
       expect(snatchVal + cnjVal).toBeCloseTo(152, 5);
-
-      await expect(page.locator('#totalKg')).toHaveAttribute('readonly', '');
-      await expect(page.locator('#editTotalBtn')).toBeVisible();
     });
   });
 
@@ -196,15 +193,15 @@ test.describe('Weightlifting Calculator', () => {
       await page.selectOption('#cnjUnit', 'kg');
 
       await expect(page.locator('#totalKg')).toHaveValue('155.6');
-      await expect(page.locator('#totalKg')).toHaveAttribute('readonly', '');
     });
 
-    test('Edit Total instead unlocks the Total field without clearing lifts', async ({ page }) => {
+    test('A new Total can be typed directly even after lifts derived one', async ({ page }) => {
       await page.fill('#snatch', '65.8');
       await page.fill('#cnj', '89.8');
-      await page.click('#editTotalBtn');
 
-      await expect(page.locator('#totalKg')).not.toHaveAttribute('readonly', '');
+      await page.fill('#totalKg', '160');
+
+      await expect(page.locator('.split-card')).toHaveCount(4);
       await expect(page.locator('#snatch')).toHaveValue('65.8');
       await expect(page.locator('#cnj')).toHaveValue('89.8');
     });

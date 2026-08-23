@@ -152,20 +152,8 @@ Then('the Snatch and Clean & Jerk fields should be filled in kg', async ({ page 
   expect(await page.inputValue('#cnj')).not.toBe('');
 });
 
-Then('the Total field should be read-only', async ({ page }) => {
-  await expect(page.locator('#totalKg')).toHaveAttribute('readonly', '');
-});
-
-Then('the Total field should be editable', async ({ page }) => {
-  await expect(page.locator('#totalKg')).not.toHaveAttribute('readonly');
-});
-
 Then('the Total should show {string} kg', async ({ page }, value) => {
   await expect(page.locator('#totalKg')).toHaveValue(value);
-});
-
-When('I click {string}', async ({ page }, label) => {
-  await page.click(`button:has-text("${label}")`);
 });
 
 Then('my Snatch and Clean & Jerk values should still be {string} and {string}', async ({ page }, snatch, cnj) => {
